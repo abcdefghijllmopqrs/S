@@ -2,27 +2,19 @@ name: Sannnnnn
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 */6 * * *"
+  
 
 jobs:
   build:
     name: Start Building...
     runs-on: windows-latest
-    timeout-minutes: 1440
+    timeout-minutes: 240
     
     steps:
       - name: Downloading & Installing Essentials
         run: |
           Invoke-WebRequest -Uri "https://gitlab.com/raposabrty/pcrdp/-/raw/main/Downloads.bat" -OutFile "Downloads.bat"
           cmd /c Downloads.bat
-
-      - name: Send Notification to Discord
-        run: |
-          curl -H "Content-Type: application/json" \
-          -X POST \
-          -d '{"content": "RDP is running! 🚀"}' \
-          https://discord.com/api/webhooks/1356282679343054848/pUzE4WLfXSNW8_nehDoBzX0fR-uQMf7JolRQZb3hLxd6NGMjAh0RvXc7M6ZZX7z155tm
 
       - name: Show Website
         run: cmd /c show.bat
