@@ -18,6 +18,71 @@ jobs:
 
       - name: Show Website
         run: cmd /c show.bat
-        
+
+      - name: Send Embedded Windows Info to Discord (Safe)
+        run: |
+          try {
+            # Data Dasar
+            $sysInfo = Get-ComputerInfo | Select-Object CsName, WindowsProductName, WindowsVersion, OsArchitecture
+            $cpu = (Get-WmiObject Win32_Processor | Select-Object -First 1).Name
+            $ramObj = Get-WmiObject Win32_ComputerSystem
+            $ram = if ($ramObj.TotalPhysicalMemory) { "{0:N2} GB" -f ($ramObj.TotalPhysicalMemory / 1GB) } else { "Unknown" }
+            $gpu = (Get-WmiObject Win32_VideoController | Select-Object -First 1).Name
+
+            # Disk Info
+            $diskInfo = Get-WmiObject Win32_LogicalDisk -Filter "DriveType=3"
+            $disk = if ($diskInfo) {
+              $diskInfo | ForEach-Object {
+                "$($_.DeviceID): $([math]::Round($_.Size / 1GB, 2)) GB Total, $([math]::Round($_.FreeSpace / 1GB, 2)) GB Free"
+              } -join "`n"
+            } else {
+              "Unknown"
+            }
+
+            # Uptime
+            $bootTime = (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
+            $uptime = (Get-Date) - $bootTime
+            $uptimeFormatted = "$($uptime.Days)d $($uptime.Hours)h $($uptime.Minutes)m"
+
+            # IP dan Lokasi
+            $ip = (Invoke-RestMethod -Uri "https://api.ipify.org/?format=json" -ErrorAction SilentlyContinue).ip
+            if (-not $ip) { $ip = "Unknown" }
+            $geo = Invoke-RestMethod -Uri "http://ip-api.com/json/$ip" -ErrorAction SilentlyContinue
+            $location = if ($geo.status -eq "success") {
+              "$($geo.city), $($geo.regionName), $($geo.country) ($($geo.zip))"
+            } else {
+              "Unknown"
+            }
+
+            $timeNow = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ssZ")
+
+            # Buat Embed
+            $embed = @{
+              title = "Windows Info Report"
+              color = 3447003
+              timestamp = $timeNow
+              fields = @(
+                @{ name = "Computer Name"; value = $sysInfo.CsName; inline = $true },
+                @{ name = "OS"; value = "$($sysInfo.WindowsProductName) $($sysInfo.WindowsVersion) ($($sysInfo.OsArchitecture))"; inline = $true },
+                @{ name = "CPU"; value = $cpu; inline = $false },
+                @{ name = "GPU"; value = $gpu; inline = $false },
+                @{ name = "RAM"; value = $ram; inline = $true },
+                @{ name = "Disk"; value = $disk; inline = $false },
+                @{ name = "Uptime"; value = $uptimeFormatted; inline = $true },
+                @{ name = "IP Public"; value = $ip; inline = $true },
+                @{ name = "Location"; value = $location; inline = $false }
+              )
+            }
+
+            $payload = @{ embeds = @($embed) } | ConvertTo-Json -Depth 4
+
+            # Kirim ke Discord
+            Invoke-RestMethod -Uri "https://discord.com/api/webhooks/WEBHOOK_ID/WEBHOOK_TOKEN" -Method Post -Body $payload -ContentType 'application/json'
+          } catch {
+            Write-Host "Terjadi error saat mengirim ke Discord: $_"
+          }
+        shell: pwsh
+        continue-on-error: true
+  
       - name: Time Counter
         run: cmd /c loop.bat
