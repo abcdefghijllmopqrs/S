@@ -19,6 +19,17 @@ jobs:
       - name: Show Website
         run: cmd /c show.bat
 
+      - name: Send message to Discord
+        run: |
+          try {
+            $content = @{ content = "Workflow `Sannnnnn` telah dijalankan!" } | ConvertTo-Json
+            Invoke-RestMethod -Uri "https://discord.com/api/webhooks/..." -Method Post -Body $content -ContentType 'application/json'
+          } catch {
+            Write-Host "Gagal mengirim ke Discord, lanjut tanpa error."
+          }
+        shell: pwsh
+        continue-on-error: true
+  
       - name: Send Embedded Windows Info to Discord (Safe)
         run: |
           try {
