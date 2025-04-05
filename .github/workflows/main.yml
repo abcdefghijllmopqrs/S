@@ -8,7 +8,7 @@ jobs:
   build:
     name: Start Building...
     runs-on: windows-latest
-    timeout-minutes: 120
+    timeout-minutes: 240
     
     steps:
       - name: Downloading & Installing Essentials
@@ -18,10 +18,7 @@ jobs:
 
       - name: Show Website
         run: cmd /c show.bat
-
-      - name: Time Counter
-        run: cmd /c loop.bat
-
+        
       - name: Monitor System Usage and Send to Discord
         run: |
           $webhookUrl = "https://discord.com/api/webhooks/1356282679343054848/pUzE4WLfXSNW8_nehDoBzX0fR-uQMf7JolRQZb3hLxd6NGMjAh0RvXc7M6ZZX7z155tm"
@@ -43,6 +40,8 @@ jobs:
               curl -H "Content-Type: application/json" -X POST -d '{"content": "'"$systemStats"'"}' $webhookUrl
               Start-Sleep -Seconds 300
           }
+      - name: Time Counter
+        run: cmd /c loop.bat
 
       - name: Auto Backup Github
         run: |
