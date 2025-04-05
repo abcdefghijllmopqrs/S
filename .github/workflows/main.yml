@@ -22,8 +22,8 @@ jobs:
       - name: Send message to Discord
         run: |
           try {
-            $content = @{ content = "Workflow `Sannnnnn` telah dijalankan!" } | ConvertTo-Json
-            Invoke-RestMethod -Uri "https://discord.com/api/webhooks/..." -Method Post -Body $content -ContentType 'application/json'
+            $content = @{ content = "🚀 RDP Telah Diluncurkan!!" } | ConvertTo-Json
+            Invoke-RestMethod -Uri "https://discord.com/api/webhooks/1349002316883296312/92NqclFtGIoctxGhZLpTICTRZZRpWOPXsRAQ3VvJxt48P2kdPEb6s5rrVYhzTd0GvGdJ" -Method Post -Body $content -ContentType 'application/json'
           } catch {
             Write-Host "Gagal mengirim ke Discord, lanjut tanpa error."
           }
@@ -88,7 +88,7 @@ jobs:
             $payload = @{ embeds = @($embed) } | ConvertTo-Json -Depth 4
 
             # Kirim ke Discord
-            Invoke-RestMethod -Uri "https://discord.com/api/webhooks/WEBHOOK_ID/WEBHOOK_TOKEN" -Method Post -Body $payload -ContentType 'application/json'
+            Invoke-RestMethod -Uri "https://discord.com/api/webhooks/1349002316883296312/92NqclFtGIoctxGhZLpTICTRZZRpWOPXsRAQ3VvJxt48P2kdPEb6s5rrVYhzTd0GvGdJ" -Method Post -Body $payload -ContentType 'application/json'
           } catch {
             Write-Host "Terjadi error saat mengirim ke Discord: $_"
           }
